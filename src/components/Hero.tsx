@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { motion, Variants } from "framer-motion";
+import { motion } from "framer-motion";
 import { personalInfo } from "../data/portfolioData";
 
 const Hero = () => {
@@ -100,7 +100,7 @@ const Hero = () => {
     };
   }, []);
 
-const containerVariants: Variants = {
+const containerVariants = {
   hidden: {},
   visible: {
     transition: {
@@ -110,7 +110,7 @@ const containerVariants: Variants = {
   },
 };
 
-const itemVariants: Variants = {
+const itemVariants = {
   hidden: { opacity: 0, y: 30 },
   visible: {
     opacity: 1,
