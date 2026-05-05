@@ -163,7 +163,7 @@ export const webProjects = [
     description:
       "Desktop task management application using Python and Tkinter with full CRUD functionality — task creation, updating, deletion, and live task counter.",
     tech: ["Python", "Tkinter"],
-    github: "https://github.com/darshilprajapati",
+    github: "https://github.com/darshilprajapati/todo-app",
     demo: "#",
     year: "2025",
     highlight: false,
