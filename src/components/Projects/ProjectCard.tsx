@@ -27,8 +27,12 @@ const ProjectCard = ({ project }: Props) => {
         padding: "24px",
         position: "relative",
         overflow: "hidden",
-      }}
-    >
+        height: "100%",              
+        display: "flex",               
+        flexDirection: "column",      
+        justifyContent: "space-between" 
+          }}
+        >
       {/* Highlight Badge */}
       {project.highlight && (
         <div
