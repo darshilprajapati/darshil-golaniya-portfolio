@@ -175,7 +175,7 @@ export const education = [
   {
     institution: "LDRP Institute of Technology and Research",
     degree: "Bachelor of Engineering in Computer Engineering",
-    period: "Sep 2023 – Jul 2026",
+    period: "Sep 2023 – May 2026",
     location: "Gandhinagar, Gujarat",
     courses: ["Artificial Intelligence", "DBMS", "Operating Systems", "Software Engineering", "DSA"],
   },
