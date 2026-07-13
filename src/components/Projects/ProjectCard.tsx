@@ -8,6 +8,7 @@ interface Project {
   demo: string;
   year: string;
   highlight?: boolean;
+  note?: string;
 }
 
 interface Props {
@@ -124,6 +125,24 @@ const ProjectCard = ({ project }: Props) => {
           </a>
         )}
       </div>
+
+      {project.note && (
+        <div
+          style={{
+            marginTop: "16px",
+            padding: "10px 14px",
+            borderRadius: "8px",
+            backgroundColor: "rgba(255, 107, 53, 0.08)",
+            borderLeft: "4px solid #ff6b35",
+            fontSize: "0.78rem",
+            color: "rgba(255, 255, 255, 0.85)",
+            lineHeight: "1.4",
+            textAlign: "left",
+          }}
+        >
+          ⚠️ <strong>Note:</strong> {project.note}
+        </div>
+      )}
     </motion.div>
   );
 };

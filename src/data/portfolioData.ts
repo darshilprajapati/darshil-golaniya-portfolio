@@ -61,30 +61,20 @@ export const experience = [
       "Developed activity logging and audit dashboards using React.js with real-time REST API integration, improving system transparency.",
     ],
   },
-  {
-    company: "Prodigy Info Tech",
-    role: "Web Development Intern",
-    period: "May 2025 – Jun 2025",
-    location: "Remote",
-    color: "#7928ca",
-    points: [
-      "Designed and built responsive web pages using HTML, CSS, and JavaScript with focus on clean UI and cross-browser compatibility.",
-    ],
-  },
-  {
-    company: "TatvaSoft",
-    role: "Angular & .NET Developer Trainee",
-    period: "Mar 2025 – Apr 2025",
-    location: "Ahmedabad, India",
-    color: "#00ff88",
-    points: [
-      "Gained hands-on training in .NET Core backend development and Angular frontend.",
-      "Built basic CRUD applications and understood component-based architecture.",
-    ],
-  },
 ];
 
 export const aimlProjects = [
+  {
+    title: "LifeSync AI",
+    description:
+      "Full-stack AI productivity and wellness platform featuring a React/TypeScript frontend and ASP.NET Core Web API backend. Implements custom 200ms React debounce timers, an async PDF report service, and secure OTP email pipeline.",
+    tech: ["React", "TypeScript", "ASP.NET Core", "SQL Server", "Python", "JWT", "Vercel", "Render"],
+    github: "https://github.com/darshilprajapati/Lifeasync-ai",
+    demo: "https://lifeasync-ai.vercel.app",
+    year: "2026",
+    highlight: true,
+    note: "To access this live project demo, please register on the platform first and contact me with your email ID. I will grant you access after login.",
+  },
   {
     title: "Mental Health Analyzer",
     description:
@@ -93,7 +83,7 @@ export const aimlProjects = [
     github: "https://github.com/darshilprajapati/MindCare",
     demo: "#",
     year: "2026",
-    highlight: true,
+    highlight: false,
   },
   {
     title: "Stock Predictor Application",
@@ -119,6 +109,17 @@ export const aimlProjects = [
 
 export const webProjects = [
   {
+    title: "LifeSync AI",
+    description:
+      "Full-stack AI productivity and wellness platform featuring a React/TypeScript frontend and ASP.NET Core Web API backend. Implements custom 200ms React debounce timers, an async PDF report service, and secure OTP email pipeline.",
+    tech: ["React", "TypeScript", "ASP.NET Core", "SQL Server", "Python", "JWT", "Vercel", "Render"],
+    github: "https://github.com/darshilprajapati/Lifeasync-ai",
+    demo: "https://lifeasync-ai.vercel.app",
+    year: "2026",
+    highlight: true,
+    note: "To access this live project demo, please register on the platform first and contact me with your email ID. I will grant you access after login.",
+  },
+  {
     title: "Web-Based Collaboration Portal",
     description:
       "Full-stack portal for secure document and folder management with RBAC, JWT authentication, activity logging and audit dashboards with real-time REST API integration.",
@@ -126,7 +127,7 @@ export const webProjects = [
     github: "https://github.com/darshilprajapati/Tatvasoft_internship_2025",
     demo: "#",
     year: "2026",
-    highlight: true,
+    highlight: false,
   },
   {
     title: "Django Online Quiz System",
