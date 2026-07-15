@@ -12,39 +12,39 @@ const SplashScreen = ({ onComplete }: SplashScreenProps) => {
   const fullName = "DARSHIL GOLANIYA";
 
   useEffect(() => {
-    // Phase 1: logo appears (0-600ms)
-    // Phase 2: name types out (600-2000ms)
-    // Phase 3: loading bar (2000-3500ms)
+    // Phase 1: logo appears (0-300ms)
+    // Phase 2: name types out (300-900ms)
+    // Phase 3: loading bar (900-1400ms)
     // Phase 4: exit
 
-    const t1 = setTimeout(() => setPhase("name"), 700);
+    const t1 = setTimeout(() => setPhase("name"), 300);
 
     let typeInterval: any;
 
-        const t2 = setTimeout(() => {
-        let i = 0;
-        typeInterval = setInterval(() => {
-            setDisplayName(fullName.slice(0, i + 1));
-            i++;
-            if (i >= fullName.length) clearInterval(typeInterval);
-        }, 60);
-        }, 700);
+    const t2 = setTimeout(() => {
+      let i = 0;
+      typeInterval = setInterval(() => {
+        setDisplayName(fullName.slice(0, i + 1));
+        i++;
+        if (i >= fullName.length) clearInterval(typeInterval);
+      }, 30);
+    }, 300);
 
     const t3 = setTimeout(() => {
       setPhase("loading");
       let prog = 0;
       const bar = setInterval(() => {
-        prog += Math.random() * 8 + 3;
+        prog += Math.random() * 15 + 10;
         if (prog >= 100) {
           prog = 100;
           clearInterval(bar);
-          setTimeout(() => setPhase("done"), 400);
-          setTimeout(() => onComplete(), 1000);
+          setTimeout(() => setPhase("done"), 150);
+          setTimeout(() => onComplete(), 400);
         }
         setProgress(Math.min(prog, 100));
-      }, 60);
+      }, 40);
       return () => clearInterval(bar);
-    }, 2100);
+    }, 900);
 
     return () => {
       clearTimeout(t1);
