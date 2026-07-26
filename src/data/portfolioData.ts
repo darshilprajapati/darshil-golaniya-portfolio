@@ -50,6 +50,17 @@ export const skills = [
 
 export const experience = [
   {
+    company: "Self-Learning & Development",
+    role: "Self-Learning & Independent Projects",
+    period: "June 2026 – Present",
+    location: "Remote",
+    color: "#7928ca",
+    points: [
+      "Continuing to build and deploy personal projects in Python, AI/ML, ASP.NET Core, and React.js to deepen practical skills beyond the degree curriculum.",
+      "Developing new features for LifeSync AI and other live applications, applying best practices in clean code, API design, and full-stack architecture.",
+    ],
+  },
+  {
     company: "Knovos India Pvt. Ltd.",
     role: ".NET Developer Intern",
     period: "Jan 2026 – Apr 2026",
@@ -68,7 +79,7 @@ export const aimlProjects = [
     title: "LifeSync AI",
     description:
       "Full-stack AI productivity and wellness platform featuring a React/TypeScript frontend and ASP.NET Core Web API backend. Implements custom 200ms React debounce timers, an async PDF report service, and secure OTP email pipeline.",
-    tech: ["React", "TypeScript", "ASP.NET Core", "SQL Server", "Python", "JWT", "Vercel", "Render"],
+    tech: ["React", "TypeScript", "EF Core", "SQL Server", "Python (FastAPI)", "JWT", "Vercel", "Render"],
     github: "https://github.com/darshilprajapati/Lifeasync-ai",
     demo: "https://lifeasync-ai.vercel.app",
     year: "2026",
@@ -112,7 +123,7 @@ export const webProjects = [
     title: "LifeSync AI",
     description:
       "Full-stack AI productivity and wellness platform featuring a React/TypeScript frontend and ASP.NET Core Web API backend. Implements custom 200ms React debounce timers, an async PDF report service, and secure OTP email pipeline.",
-    tech: ["React", "TypeScript", "ASP.NET Core", "SQL Server", "Python", "JWT", "Vercel", "Render"],
+    tech: ["React", "TypeScript", "EF Core", "SQL Server", "Python (FastAPI)", "JWT", "Vercel", "Render"],
     github: "https://github.com/darshilprajapati/Lifeasync-ai",
     demo: "https://lifeasync-ai.vercel.app",
     year: "2026",
