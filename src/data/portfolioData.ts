@@ -8,7 +8,7 @@ export const personalInfo = {
   roles: ["Python Developer", "AI/ML Engineer", "Full Stack Developer", ".NET Developer"],
   email: "gdarshil1203@gmail.com",
   phone: "+917046818092",
-  linkedin: "https://linkedin.com/in/darshil-golaniya",
+  linkedin: "https://www.linkedin.com/in/darshil-golaniya-3b272b309/",
   github: "https://github.com/darshilprajapati",
   whatsapp: "https://wa.me/917046818092",
   summary:
@@ -49,17 +49,6 @@ export const skills = [
 ];
 
 export const experience = [
-  {
-    company: "Self-Learning & Development",
-    role: "Self-Learning & Independent Projects",
-    period: "June 2026 – Present",
-    location: "Remote",
-    color: "#7928ca",
-    points: [
-      "Continuing to build and deploy personal projects in Python, AI/ML, ASP.NET Core, and React.js to deepen practical skills beyond the degree curriculum.",
-      "Developing new features for LifeSync AI and other live applications, applying best practices in clean code, API design, and full-stack architecture.",
-    ],
-  },
   {
     company: "Knovos India Pvt. Ltd.",
     role: ".NET Developer Intern",
