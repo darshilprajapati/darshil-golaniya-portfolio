@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { personalInfo } from "../data/portfolioData";
 
 const navLinks = [
   { label: "About", href: "#about" },

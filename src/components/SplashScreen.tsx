@@ -19,7 +19,7 @@ const SplashScreen = ({ onComplete }: SplashScreenProps) => {
 
     const t1 = setTimeout(() => setPhase("name"), 300);
 
-    let typeInterval: any;
+    let typeInterval: ReturnType<typeof setInterval> | undefined;
 
     const t2 = setTimeout(() => {
       let i = 0;

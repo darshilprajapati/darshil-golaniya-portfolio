@@ -129,6 +129,8 @@ export const PortraitReveal: React.FC<PortraitRevealProps> = ({ className = "" }
             className="portfolio-hero__portrait-img portfolio-hero__portrait-img--bw"
             loading="eager"
             decoding="async"
+            width={576}
+            height={1024}
           />
 
           {/* Reveal layer: Full color photograph revealed under cursor */}
@@ -151,6 +153,8 @@ export const PortraitReveal: React.FC<PortraitRevealProps> = ({ className = "" }
               className="portfolio-hero__portrait-img portfolio-hero__portrait-img--color"
               loading="eager"
               decoding="async"
+              width={576}
+              height={1024}
             />
           </div>
 

@@ -71,36 +71,43 @@ export const ParticleTypography: React.FC<ParticleTypographyProps> = ({
   }, []);
 
   // Dense particle sampling from rasterized editorial serif typography
-  const initParticles = useCallback(() => {
+  const initParticles = useCallback((explicitWidth?: number) => {
     const container = containerRef.current;
     const canvas = canvasRef.current;
     if (!container || !canvas) return;
 
-    const rect = container.getBoundingClientRect();
-    const width = Math.max(Math.round(rect.width), 220);
+    // Use explicit width or measure from layout clientWidth / boundingClientRect
+    const measuredWidth = explicitWidth !== undefined && explicitWidth > 0 
+      ? explicitWidth 
+      : Math.round(container.clientWidth || container.getBoundingClientRect().width);
+    
+    // Avoid generating particles from a zero-sized container
+    if (measuredWidth <= 0) return;
+
+    const width = measuredWidth;
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
 
-    // Responsive font size: 52px on desktop (increased by ~18%)
+    // Responsive font size: 52px on desktop
     let fontSize = fontSizeOverride || 52;
     if (!fontSizeOverride) {
-      if (width < 320) {
-        fontSize = 30;
-      } else if (width < 450) {
-        fontSize = 36;
-      } else if (width < 600) {
-        fontSize = 44;
+      if (width < 280) {
+        fontSize = 32;
+      } else if (width < 380) {
+        fontSize = 40;
+      } else if (width < 480) {
+        fontSize = 48;
       } else {
-        fontSize = 52;
+        fontSize = 54;
       }
     }
 
-    const height = Math.round(fontSize * 1.6);
+    const height = Math.round(fontSize * 1.55);
     const canvasW = Math.round(width * dpr);
     const canvasH = Math.round(height * dpr);
 
     canvas.width = canvasW;
     canvas.height = canvasH;
-    canvas.style.width = `${width}px`;
+    canvas.style.width = "100%";
     canvas.style.height = `${height}px`;
 
     // Offscreen canvas for font glyph sampling
@@ -116,15 +123,15 @@ export const ParticleTypography: React.FC<ParticleTypographyProps> = ({
     offCtx.textAlign = align;
 
     // Safety auto-fit check so wide text never overflows the canvas
-    const maxAvailableWidth = width - 40;
-    let measuredWidth = offCtx.measureText(text).width;
-    while (measuredWidth > maxAvailableWidth && fontSize > 26) {
-      fontSize -= 1.5;
+    const maxAvailableWidth = width - 16;
+    let textWidth = offCtx.measureText(text).width;
+    while (textWidth > maxAvailableWidth && fontSize > 22) {
+      fontSize -= 1;
       offCtx.font = `600 ${fontSize}px "Cormorant Garamond", "Playfair Display", Georgia, serif`;
-      measuredWidth = offCtx.measureText(text).width;
+      textWidth = offCtx.measureText(text).width;
     }
 
-    const textX = align === "center" ? width / 2 : align === "right" ? width - 20 : 20;
+    const textX = align === "center" ? width / 2 : align === "right" ? width - 8 : 8;
     offCtx.fillStyle = "#ffffff";
     offCtx.fillText(text, textX, height / 2);
 
@@ -226,22 +233,69 @@ export const ParticleTypography: React.FC<ParticleTypographyProps> = ({
     particlesRef.current = newParticles;
   }, [text, align, fontSizeOverride]);
 
-  // Handle font loading and responsive resizing
+  // Robust initialization using ResizeObserver and font loading events
   useEffect(() => {
-    initParticles();
+    const container = containerRef.current;
+    if (!container) return;
 
-    if (document.fonts) {
-      document.fonts.ready.then(() => {
-        initParticles();
-      });
-    }
+    let rafId: number | null = null;
+    let lastWidth = 0;
 
-    const handleResize = () => {
-      initParticles();
+    const measureAndInit = () => {
+      const curWidth = Math.round(container.clientWidth || container.getBoundingClientRect().width);
+      if (curWidth > 0 && Math.abs(curWidth - lastWidth) >= 4) {
+        lastWidth = curWidth;
+        initParticles(curWidth);
+      }
     };
 
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    // Initial measurement
+    measureAndInit();
+
+    // Use ResizeObserver to respond to any container layout/flex/grid size changes
+    let ro: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== "undefined") {
+      ro = new ResizeObserver((entries) => {
+        if (rafId) cancelAnimationFrame(rafId);
+        rafId = requestAnimationFrame(() => {
+          for (const entry of entries) {
+            const w = Math.round(entry.contentRect.width || entry.target.clientWidth);
+            if (w > 0 && Math.abs(w - lastWidth) >= 4) {
+              lastWidth = w;
+              initParticles(w);
+            }
+          }
+        });
+      });
+      ro.observe(container);
+    }
+
+    // Font readiness check - ensures particles resample when Cormorant Garamond is ready
+    if (document.fonts) {
+      document.fonts.ready.then(() => {
+        measureAndInit();
+      });
+      if (document.fonts.load) {
+        document.fonts.load('600 52px "Cormorant Garamond"').then(() => {
+          measureAndInit();
+        });
+      }
+    }
+
+    const handleWindowResize = () => {
+      if (rafId) cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(() => {
+        measureAndInit();
+      });
+    };
+
+    window.addEventListener("resize", handleWindowResize);
+
+    return () => {
+      if (rafId) cancelAnimationFrame(rafId);
+      if (ro) ro.disconnect();
+      window.removeEventListener("resize", handleWindowResize);
+    };
   }, [initParticles]);
 
   // Interactive animation loop
