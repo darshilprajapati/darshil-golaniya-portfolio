@@ -70,14 +70,12 @@ const Navbar = () => {
           <motion.div
             whileHover={{ scale: 1.05 }}
             style={{
-              fontFamily: "var(--font-display)",
-              fontSize: "1.4rem",
-              fontWeight: 900,
-              background: "linear-gradient(135deg, var(--cyan), var(--purple))",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              backgroundClip: "text",
-              letterSpacing: "0.05em",
+              fontFamily: "'Plus Jakarta Sans', 'DM Sans', sans-serif",
+              fontSize: "1.5rem",
+              fontWeight: 800,
+              color: "var(--cyan)",
+              textShadow: "0 0 16px rgba(0, 212, 255, 0.4)",
+              letterSpacing: "0.04em",
               cursor: "pointer",
             }}
           >

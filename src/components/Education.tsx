@@ -1,114 +1,80 @@
-import { motion } from "framer-motion";
-import { education } from "../data/portfolioData";
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { education, personalInfo } from "../data/portfolioData";
+import LanyardIdCard from "./LanyardIdCard";
+import "./Education.css";
 
 const Education = () => {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const currentEdu = education[activeIndex] || education[0];
+
   return (
-    <section
-      id="education"
-      style={{
-        padding: "100px 2rem",
-        maxWidth: "1100px",
-        margin: "0 auto",
-      }}
-    >
+    <section id="education" className="education-section">
       {/* Section Header */}
-      <div style={{ marginBottom: "60px" }}>
+      <div className="education-section__header">
         <span className="section-label">Education</span>
-        <h2 className="section-title gradient-text">
-          Academic Background
-        </h2>
+        <h2 className="section-title gradient-text">Academic Background</h2>
         <div className="section-divider" />
       </div>
 
-      {/* Cards */}
-      <div
-        style={{
-          display: "grid",
-          gap: "24px",
-        }}
-      >
-        {education.map((edu, index) => (
-          <motion.div
-            key={index}
-            className="glass-card"
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.15, duration: 0.6 }}
-            viewport={{ once: true }}
-            whileHover={{ translateY: -6 }}
-            style={{
-              padding: "24px",
-            }}
-          >
-            {/* Top Row */}
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                flexWrap: "wrap",
-                gap: "10px",
-                marginBottom: "10px",
-              }}
+      {/* Two-Column Responsive Layout */}
+      <div className="education-grid">
+        {/* Left Column: Academic Credentials Detail */}
+        <div className="education-left">
+          {/* Active Qualification Glass Card */}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentEdu.degree}
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -16 }}
+              transition={{ duration: 0.3 }}
+              className="education-card"
             >
-              <h3
-                style={{
-                  fontFamily: "var(--font-display)",
-                  fontSize: "1.2rem",
-                }}
-              >
-                {edu.degree}
-              </h3>
-
-              <span
-                style={{
-                  fontFamily: "var(--font-mono)",
-                  fontSize: "0.75rem",
-                  color: "var(--text-muted)",
-                }}
-              >
-                {edu.period}
-              </span>
-            </div>
-
-            {/* Institution */}
-            <p
-              style={{
-                color: "var(--cyan)",
-                fontSize: "0.9rem",
-                marginBottom: "6px",
-                fontFamily: "var(--font-mono)",
-              }}
-            >
-              {edu.institution}
-            </p>
-
-            {/* Location */}
-            <p
-              style={{
-                color: "var(--text-muted)",
-                fontSize: "0.8rem",
-                marginBottom: "14px",
-              }}
-            >
-              {edu.location}
-            </p>
-
-            {/* Courses */}
-            <div
-              style={{
-                display: "flex",
-                flexWrap: "wrap",
-                gap: "10px",
-              }}
-            >
-              {edu.courses.map((course) => (
-                <span key={course} className="skill-tag">
-                  {course}
+              <div className="education-card__top">
+                <span className="education-card__period">{currentEdu.period}</span>
+                <span className="education-status-badge">
+                  GRADUATED
                 </span>
-              ))}
-            </div>
-          </motion.div>
-        ))}
+              </div>
+
+              <h3 className="education-card__degree">{currentEdu.degree}</h3>
+
+              <p className="education-card__institution">
+                <span>🏛️</span>
+                <span>{currentEdu.institution}</span>
+              </p>
+
+              <p className="education-card__location">
+                <span>📍</span>
+                <span>{currentEdu.location}</span>
+              </p>
+
+              <div>
+                <span className="education-card__section-label">
+                  Key Curriculum & Technical Focus
+                </span>
+                <div className="education-card__courses">
+                  {currentEdu.courses.map((course) => (
+                    <span key={course} className="skill-tag">
+                      {course}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+          </AnimatePresence>
+        </div>
+
+        {/* Right Column: Physical 3D Student ID Card Suspended by Lanyard */}
+        <div className="education-right">
+          <LanyardIdCard
+            educationData={education}
+            activeIndex={activeIndex}
+            onSelectIndex={setActiveIndex}
+            studentName={personalInfo.name}
+          />
+        </div>
       </div>
     </section>
   );

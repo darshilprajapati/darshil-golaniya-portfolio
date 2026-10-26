@@ -39,7 +39,7 @@ export const skills = [
   {
     category: "Tools & DevOps",
     icon: "🛠️",
-    items: [ "GitHub", "Postman", "VS Code", "Visual Studio", "Swagger", "REST APIs", "JWT"],
+    items: ["GitHub", "Postman", "VS Code", "Visual Studio", "Swagger", "REST APIs", "JWT"],
   },
   {
     category: "Concepts",
@@ -50,10 +50,26 @@ export const skills = [
 
 export const experience = [
   {
+    company: "MagnusMinds IT Solution",
+    role: "Software Engineer Intern",
+    period: "August 2026 – Present",
+    location: "Ahmedabad, Gujarat, India",
+    workArrangement: "On-site",
+    employmentType: "Internship",
+    color: "#a855f7",
+    linkedin: "https://www.linkedin.com/company/14657063/",
+    logo: "https://media.licdn.com/dms/image/v2/D4D0BAQGx0blL4jLjBg/company-logo_100_100/company-logo_100_100/0/1694598995610/magnusmind_logo?e=1794441600&v=beta&t=e80Jpn1u8EdvCZ0eOKAMhXY6jCV70IWwyOQUwKxgbUE",
+    points: [
+      "Full-time Software Engineer Intern working on-site in Ahmedabad, contributing to core application development and modern engineering solutions.",
+    ],
+  },
+  {
     company: "Knovos India Pvt. Ltd.",
     role: ".NET Developer Intern",
-    period: "Jan 2026 – Apr 2026",
+    period: "January 2026 – April 2026",
     location: "Gandhinagar, India",
+    workArrangement: "On-site",
+    employmentType: "Internship",
     color: "#00d4ff",
     points: [
       "Built a production-grade Web-Based Collaboration Portal using ASP.NET Core, React.js, and SQL Server with folder management and document handling.",

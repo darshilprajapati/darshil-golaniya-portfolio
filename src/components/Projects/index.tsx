@@ -1,66 +1,52 @@
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import AIMLProjects from "./AIMLProjects";
-import ReactProjects from "./ReactProjects";
+import { useState, useMemo } from "react";
+import { aimlProjects, webProjects } from "../../data/portfolioData";
+import OrbitalRing from "./OrbitalRing";
+import ProjectDetailModal from "./ProjectDetailModal";
+import type { Project } from "./types";
+import "./ProjectsOrbital.css";
 
 const Projects = () => {
-  const [activeTab, setActiveTab] = useState<"aiml" | "web">("aiml");
+  // Combine all existing project records without category filters and deduplicate
+  const allProjects = useMemo<Project[]>(() => {
+    const combined = [...aimlProjects, ...webProjects];
+    return combined.filter(
+      (project, index, self) =>
+        index ===
+        self.findIndex(
+          (p) =>
+            p.title.trim().toLowerCase() === project.title.trim().toLowerCase()
+        )
+    );
+  }, []);
+
+  const [selectedProject, setSelectedProject] = useState<{
+    project: Project;
+    index: number;
+  } | null>(null);
+
+  const handleSelectProject = (project: Project, index: number) => {
+    setSelectedProject({ project, index });
+  };
+
+  const handleCloseModal = () => {
+    setSelectedProject(null);
+  };
 
   return (
-    <section
-      id="projects"
-      style={{
-        padding: "100px 2rem",
-        maxWidth: "1200px",
-        margin: "0 auto",
-      }}
-    >
-      {/* Section Header */}
-      <div style={{ marginBottom: "60px" }}>
-        <span className="section-label">Projects</span>
-        <h2 className="section-title gradient-text">
-          Featured Work
-        </h2>
-        <div className="section-divider" />
-      </div>
+    <section id="projects" className="projects-orbital">
+      {/* Full-Screen Immersive 3D Orbital Showcase with embedded background typography */}
+      <OrbitalRing
+        projects={allProjects}
+        onSelectProject={handleSelectProject}
+      />
 
-      {/* Tabs */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          gap: "16px",
-          marginBottom: "50px",
-          flexWrap: "wrap",
-        }}
-      >
-        <button
-          onClick={() => setActiveTab("aiml")}
-          className={`tab-btn ${activeTab === "aiml" ? "active" : ""}`}
-        >
-          AI / ML Projects
-        </button>
-
-        <button
-          onClick={() => setActiveTab("web")}
-          className={`tab-btn ${activeTab === "web" ? "active" : ""}`}
-        >
-          Web / Full Stack
-        </button>
-      </div>
-
-      {/* Content */}
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={activeTab}
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -30 }}
-          transition={{ duration: 0.5 }}
-        >
-          {activeTab === "aiml" ? <AIMLProjects /> : <ReactProjects />}
-        </motion.div>
-      </AnimatePresence>
+      {/* Accessible Detail Modal */}
+      <ProjectDetailModal
+        project={selectedProject?.project ?? null}
+        index={selectedProject?.index}
+        total={allProjects.length}
+        onClose={handleCloseModal}
+      />
     </section>
   );
 };

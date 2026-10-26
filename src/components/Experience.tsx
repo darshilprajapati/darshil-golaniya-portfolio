@@ -1,113 +1,116 @@
+import React from "react";
 import { motion } from "framer-motion";
 import { experience } from "../data/portfolioData";
+import { EvervaultCard, Icon } from "./ui/evervault-card";
+import "./Experience.css";
 
-const Experience = () => {
+const Experience: React.FC = () => {
   return (
-    <section
-      id="experience"
-      style={{
-        padding: "100px 2rem",
-        maxWidth: "1100px",
-        margin: "0 auto",
-        position: "relative",
-      }}
-    >
+    <section id="experience" className="experience-section">
       {/* Section Header */}
-      <div style={{ marginBottom: "60px" }}>
+      <div className="experience-header">
         <span className="section-label">Experience</span>
-        <h2 className="section-title gradient-text">
-          Professional Journey
-        </h2>
+        <h2 className="section-title gradient-text">Professional Journey</h2>
         <div className="section-divider" />
       </div>
 
-      {/* Timeline Wrapper */}
-      <div style={{ position: "relative", paddingLeft: "60px" }}>
-        {/* Vertical Line */}
+      {/* Vertical Experience Timeline */}
+      <div className="experience-timeline">
+        {/* Continuous Gradient Connector Line */}
         <div className="timeline-line" />
 
         {experience.map((exp, index) => (
           <motion.div
-            key={index}
-            initial={{ opacity: 0, y: 40 }}
+            key={exp.company}
+            className="timeline-item"
+            initial={{ opacity: 0, y: 35 }}
             whileInView={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.15, duration: 0.6 }}
+            transition={{ delay: index * 0.16, duration: 0.55 }}
             viewport={{ once: true }}
-            style={{
-              position: "relative",
-              marginBottom: "50px",
-            }}
           >
-            {/* Dot */}
+            {/* Timeline Node Dot */}
             <div
               className="timeline-dot"
               style={{
                 borderColor: exp.color,
-                boxShadow: `0 0 12px ${exp.color}`,
+                boxShadow: `0 0 14px ${exp.color}`,
               }}
             />
 
-            {/* Card */}
+            {/* Experience Card Outer with Evervault 4 Corner Icons (+) */}
             <motion.div
-              className="glass-card"
-              whileHover={{ translateY: -6 }}
-              style={{
-                padding: "24px",
-                marginLeft: "20px",
-              }}
+              className="experience-card-outer"
+              whileHover={{ translateY: -5 }}
+              transition={{ duration: 0.25 }}
             >
-              {/* Header */}
-              <div style={{ marginBottom: "12px" }}>
-                <h3
-                  style={{
-                    fontFamily: "var(--font-display)",
-                    fontSize: "1.2rem",
-                    marginBottom: "4px",
-                  }}
-                >
-                  {exp.role}
-                </h3>
+              <Icon className="evervault-corner-icon evervault-corner-icon--tl" />
+              <Icon className="evervault-corner-icon evervault-corner-icon--tr" />
+              <Icon className="evervault-corner-icon evervault-corner-icon--bl" />
+              <Icon className="evervault-corner-icon evervault-corner-icon--br" />
 
-                <span
-                  style={{
-                    color: exp.color,
-                    fontSize: "0.85rem",
-                    fontFamily: "var(--font-mono)",
-                  }}
-                >
-                  {exp.company}
-                </span>
-              </div>
+              {/* Evervault Interactive Encrypted Hover Card */}
+              <EvervaultCard className="experience-card" color={exp.color}>
+                {/* Header: Role Title + Badge */}
+                <div className="experience-card__header">
+                  <div className="experience-card__title-group">
+                    <h3 className="experience-card__role">{exp.role}</h3>
 
-              {/* Meta Info */}
-              <div
-                style={{
-                  fontSize: "0.75rem",
-                  color: "var(--text-muted)",
-                  marginBottom: "14px",
-                  fontFamily: "var(--font-mono)",
-                  letterSpacing: "0.05em",
-                }}
-              >
-                {exp.period} • {exp.location}
-              </div>
+                    <div className="experience-card__company-row">
+                      {exp.logo && (
+                        <img
+                          src={exp.logo}
+                          alt={exp.company}
+                          className="experience-card__company-logo"
+                          onError={(e) => {
+                            e.currentTarget.style.display = "none";
+                          }}
+                        />
+                      )}
+                      <span
+                        className="experience-card__company-name"
+                        style={{ color: exp.color }}
+                      >
+                        {exp.company}
+                      </span>
+                    </div>
+                  </div>
 
-              {/* Points */}
-              <ul
-                style={{
-                  paddingLeft: "16px",
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "8px",
-                  color: "var(--text-muted)",
-                  fontSize: "0.9rem",
-                  lineHeight: 1.6,
-                }}
-              >
-                {exp.points.map((point, i) => (
-                  <li key={i}>{point}</li>
-                ))}
-              </ul>
+                  {/* Work Arrangement & Employment Badge */}
+                  {exp.workArrangement && (
+                    <span className="experience-card__badge">
+                      <span
+                        className="experience-card__badge-dot"
+                        style={{ backgroundColor: exp.color }}
+                      />
+                      <span>
+                        {exp.employmentType
+                          ? `${exp.employmentType} · ${exp.workArrangement}`
+                          : exp.workArrangement}
+                      </span>
+                    </span>
+                  )}
+                </div>
+
+                {/* Meta Row: Period & Location */}
+                <div className="experience-card__meta">
+                  <span className="experience-card__meta-item">
+                    <span>🗓️</span>
+                    <span>{exp.period}</span>
+                  </span>
+                  <span>•</span>
+                  <span className="experience-card__meta-item">
+                    <span>📍</span>
+                    <span>{exp.location}</span>
+                  </span>
+                </div>
+
+                {/* Verified Responsibilities / Points */}
+                <ul className="experience-card__points">
+                  {exp.points.map((point, i) => (
+                    <li key={i}>{point}</li>
+                  ))}
+                </ul>
+              </EvervaultCard>
             </motion.div>
           </motion.div>
         ))}
