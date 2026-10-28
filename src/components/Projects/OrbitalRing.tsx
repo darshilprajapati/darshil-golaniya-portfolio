@@ -7,6 +7,8 @@ import {
   FiPause,
   FiChevronLeft,
   FiChevronRight,
+  FiBox,
+  FiLayers,
 } from "react-icons/fi";
 import type { Project } from "./types";
 
@@ -22,30 +24,64 @@ function computeResponsiveDimensions(width: number, height: number, count: numbe
   let h = 305;
   let baseR = Math.max(380, Math.min(width * 0.28, count * 45));
   let tiltX = -13;
+  let activeBoost = 12;
+  let neighborScale = 0.94;
+  let farScale = 0.82;
+  let ringOffsetY = -12;
 
-  if (width < 480) {
-    w = 175;
-    h = 245;
-    baseR = Math.max(210, count * 24);
-    tiltX = -8;
+  if (width < 360 || height < 650) {
+    // Ultra compact mobile (e.g. 320px width or short screens)
+    w = Math.min(160, Math.round(width * 0.5));
+    h = Math.min(215, Math.round(height * 0.34));
+    baseR = Math.max(150, Math.round(width * 0.44));
+    tiltX = -6;
+    activeBoost = 26;
+    neighborScale = 0.78;
+    farScale = 0.62;
+    ringOffsetY = -52;
+  } else if (width < 480) {
+    // Standard mobile (360px - 479px, e.g. 375, 390, 430)
+    w = Math.min(Math.round(width * 0.48), 185);
+    h = Math.min(Math.round(w * 1.34), Math.round(height * 0.36), 254);
+    baseR = Math.max(165, Math.round(width * 0.45));
+    tiltX = -7;
+    activeBoost = 26;
+    neighborScale = 0.80;
+    farScale = 0.65;
+    ringOffsetY = -44;
   } else if (width < 768) {
+    // Large mobile / mini tablet (480px - 767px)
     w = 200;
-    h = 265;
-    baseR = Math.max(270, count * 31);
-    tiltX = -10;
+    h = 270;
+    baseR = Math.max(220, Math.round(width * 0.38));
+    tiltX = -9;
+    activeBoost = 22;
+    neighborScale = 0.85;
+    farScale = 0.72;
+    ringOffsetY = -36;
   } else if (width < 1024) {
-    w = 215;
-    h = 285;
-    baseR = Math.max(320, count * 37);
-    tiltX = -12;
+    // Tablet (768px - 1023px)
+    w = 220;
+    h = 290;
+    baseR = Math.max(300, Math.min(width * 0.32, count * 37));
+    tiltX = -11;
+    activeBoost = 16;
+    neighborScale = 0.90;
+    farScale = 0.78;
+    ringOffsetY = -20;
   } else if (height < 780) {
-    // Compact desktop height (e.g. 1366x768 after navbar)
+    // Compact desktop height
     w = 220;
     h = 280;
     baseR = Math.max(350, count * 40);
     tiltX = -11;
+    activeBoost = 12;
+    neighborScale = 0.94;
+    farScale = 0.82;
+    ringOffsetY = -14;
   }
-  return { w, h, baseR, tiltX };
+
+  return { w, h, baseR, tiltX, activeBoost, neighborScale, farScale, ringOffsetY };
 }
 
 export const OrbitalRing: React.FC<OrbitalRingProps> = ({
@@ -66,6 +102,9 @@ export const OrbitalRing: React.FC<OrbitalRingProps> = ({
       count
     )
   );
+
+  // Orbital 3D carousel is default on all devices (mobile & desktop)
+  const [viewMode, setViewMode] = useState<"orbit" | "card">("orbit");
   const [spacingIdx, setSpacingIdx] = useState(1);
   const [autoOrbit, setAutoOrbit] = useState(true);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -90,17 +129,24 @@ export const OrbitalRing: React.FC<OrbitalRingProps> = ({
     reduceMotion: false,
     autoOrbit: true,
     lastReportedIndex: 0,
+    viewMode: "orbit" as "orbit" | "card",
   });
 
-  // Keep animRef autoOrbit in sync
+  // Keep animRef in sync
   useEffect(() => {
     animRef.current.autoOrbit = autoOrbit;
   }, [autoOrbit]);
 
+  useEffect(() => {
+    animRef.current.viewMode = viewMode;
+  }, [viewMode]);
+
   // Window resize listener
   useEffect(() => {
     const handleResize = () => {
-      setPanelSize(computeResponsiveDimensions(window.innerWidth, window.innerHeight, count));
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      setPanelSize(computeResponsiveDimensions(w, h, count));
     };
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
@@ -136,10 +182,10 @@ export const OrbitalRing: React.FC<OrbitalRingProps> = ({
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          animRef.current.isVisible = entry.isIntersecting;
+          animRef.current.isVisible = entry.isIntersecting || entry.intersectionRatio > 0;
         });
       },
-      { threshold: 0.1 }
+      { threshold: 0 }
     );
     observer.observe(stage);
 
@@ -153,34 +199,67 @@ export const OrbitalRing: React.FC<OrbitalRingProps> = ({
     };
     window.addEventListener("mousemove", handleMouseMove, { passive: true });
 
-    // Pointer Drag handlers
+    // Touch & Pointer Gesture Management
+    let isHorizontalGesture = false;
+
     const handlePointerDown = (e: PointerEvent) => {
       const target = e.target as HTMLElement;
       if (target.closest("a, button, input, textarea")) return;
 
-      animRef.current.dragging = true;
-      animRef.current.hasMoved = false;
       animRef.current.startX = e.clientX;
       animRef.current.startY = e.clientY;
       animRef.current.lastX = e.clientX;
-      animRef.current.velocity = 0;
-      animRef.current.targetRotation = null;
+      animRef.current.hasMoved = false;
+      isHorizontalGesture = false;
 
-      stage.classList.add("is-dragging");
-      try {
-        stage.setPointerCapture(e.pointerId);
-      } catch {
-        // pointer capture fallback
+      if (e.pointerType === "mouse") {
+        animRef.current.dragging = true;
+        animRef.current.velocity = 0;
+        animRef.current.targetRotation = null;
+        stage.classList.add("is-dragging");
+        try {
+          stage.setPointerCapture(e.pointerId);
+        } catch {
+          // ignore
+        }
+      } else {
+        // Touch events: do NOT capture immediately to preserve native vertical scroll
+        animRef.current.dragging = false;
       }
     };
 
     const handlePointerMove = (e: PointerEvent) => {
-      if (!animRef.current.dragging) return;
       const dx = e.clientX - animRef.current.lastX;
-      const dist = Math.hypot(
-        e.clientX - animRef.current.startX,
-        e.clientY - animRef.current.startY
-      );
+      const totalDx = e.clientX - animRef.current.startX;
+      const totalDy = e.clientY - animRef.current.startY;
+      const dist = Math.hypot(totalDx, totalDy);
+
+      // On touch devices, detect if intent is horizontal swipe or vertical page scroll
+      if (e.pointerType === "touch" && !animRef.current.dragging && !isHorizontalGesture) {
+        if (dist > 8) {
+          if (Math.abs(totalDx) > Math.abs(totalDy) * 1.1) {
+            // Horizontal intent confirmed
+            isHorizontalGesture = true;
+            animRef.current.dragging = true;
+            animRef.current.hasMoved = true;
+            animRef.current.velocity = 0;
+            animRef.current.targetRotation = null;
+            stage.classList.add("is-dragging");
+            try {
+              stage.setPointerCapture(e.pointerId);
+            } catch {
+              // ignore
+            }
+          } else {
+            // Vertical intent: let normal scroll happen
+            return;
+          }
+        } else {
+          return;
+        }
+      }
+
+      if (!animRef.current.dragging) return;
       if (dist > 6) {
         animRef.current.hasMoved = true;
       }
@@ -190,8 +269,9 @@ export const OrbitalRing: React.FC<OrbitalRingProps> = ({
     };
 
     const endDrag = (e: PointerEvent) => {
-      if (!animRef.current.dragging) return;
+      if (!animRef.current.dragging && !isHorizontalGesture) return;
       animRef.current.dragging = false;
+      isHorizontalGesture = false;
       stage.classList.remove("is-dragging");
       try {
         stage.releasePointerCapture(e.pointerId);
@@ -239,7 +319,7 @@ export const OrbitalRing: React.FC<OrbitalRingProps> = ({
     const loop = () => {
       const state = animRef.current;
 
-      if (state.isVisible) {
+      if (state.isVisible && state.viewMode === "orbit") {
         if (!state.dragging) {
           if (state.targetRotation !== null) {
             const diff = state.targetRotation - state.rotation;
@@ -303,6 +383,7 @@ export const OrbitalRing: React.FC<OrbitalRingProps> = ({
   const rotateToProject = useCallback(
     (index: number) => {
       if (count === 0) return;
+      setActiveIndex(index);
       const stepAngle = 360 / count;
       const desiredAngle = -index * stepAngle;
       const currentRot = animRef.current.rotation;
@@ -329,10 +410,40 @@ export const OrbitalRing: React.FC<OrbitalRingProps> = ({
 
   const effectiveRadius = Math.round(panelSize.baseR * SPACING_LEVELS[spacingIdx]);
 
+  // Touch swipe support for card mode
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
+
+  const handleCardTouchStart = (e: React.TouchEvent) => {
+    touchStartRef.current = {
+      x: e.touches[0].clientX,
+      y: e.touches[0].clientY,
+    };
+  };
+
+  const handleCardTouchEnd = (e: React.TouchEvent) => {
+    if (!touchStartRef.current) return;
+    const dx = e.changedTouches[0].clientX - touchStartRef.current.x;
+    const dy = e.changedTouches[0].clientY - touchStartRef.current.y;
+    touchStartRef.current = null;
+
+    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 35) {
+      if (dx > 0) {
+        handlePrev();
+      } else {
+        handleNext();
+      }
+    }
+  };
+
   return (
-    <div className="projects-orbital__stage-container">
+    <div className={`projects-orbital__stage-container view-mode--${viewMode}`}>
       {/* 3D Grab & Drag Stage */}
-      <div className="projects-orbital__stage" ref={stageRef}>
+      <div
+        className="projects-orbital__stage"
+        ref={stageRef}
+        onTouchStart={viewMode === "card" ? handleCardTouchStart : undefined}
+        onTouchEnd={viewMode === "card" ? handleCardTouchEnd : undefined}
+      >
         <div className="projects-orbital__parallax" ref={parallaxRef}>
           {/* Centered 3D Background Heading - Embedded naturally behind the orbital ring */}
           <div className="projects-orbital__bg-heading">
@@ -340,9 +451,17 @@ export const OrbitalRing: React.FC<OrbitalRingProps> = ({
             <h2 className="projects-orbital__bg-title">FEATURED WORK</h2>
           </div>
 
+          {/* 3D Orbit Ring Mode */}
           <div
-            className="projects-orbital__ring-tilt"
-            style={{ "--tiltX": `${panelSize.tiltX}deg` } as React.CSSProperties}
+            className={`projects-orbital__ring-tilt ${
+              viewMode === "card" ? "is-hidden-mode" : ""
+            }`}
+            style={
+              {
+                "--tiltX": `${panelSize.tiltX}deg`,
+                "--ringOffsetY": `${panelSize.ringOffsetY}px`,
+              } as React.CSSProperties
+            }
           >
             {/* Core Ambient Light Halo */}
             <div className="projects-orbital__core-halo" />
@@ -353,11 +472,26 @@ export const OrbitalRing: React.FC<OrbitalRingProps> = ({
                 const angle = (360 / count) * i;
                 const tilt = Math.sin((i / count) * Math.PI * 2) * 6;
                 const formattedNum = String(i + 1).padStart(2, "0");
+                const isActive = activeIndex === i;
+                const distFromActive = Math.min(
+                  Math.abs(i - activeIndex),
+                  count - Math.abs(i - activeIndex)
+                );
+
+                const scaleFactor = isActive
+                  ? 1.06
+                  : distFromActive === 1
+                  ? panelSize.neighborScale
+                  : panelSize.farScale;
+
+                const activeZ = isActive ? panelSize.activeBoost : 0;
 
                 return (
                   <div
                     key={`${project.title}-${project.year}-${i}`}
-                    className="projects-orbital__panel"
+                    className={`projects-orbital__panel ${
+                      isActive ? "is-active-panel" : ""
+                    } dist-${distFromActive}`}
                     style={
                       {
                         "--ry": `${angle}deg`,
@@ -366,6 +500,8 @@ export const OrbitalRing: React.FC<OrbitalRingProps> = ({
                         "--i": i,
                         "--panel-w": `${panelSize.w}px`,
                         "--panel-h": `${panelSize.h}px`,
+                        "--active-z": `${activeZ}px`,
+                        "--scale-factor": scaleFactor,
                       } as React.CSSProperties
                     }
                     onClick={() => {
@@ -396,7 +532,7 @@ export const OrbitalRing: React.FC<OrbitalRingProps> = ({
                           <span className="projects-orbital__pnum">{formattedNum}</span>
                           <span className="projects-orbital__year-badge">{project.year}</span>
                           {project.highlight && (
-                            <span className="highlight-badge">⭐ Featured</span>
+                            <span className="highlight-badge">⭐</span>
                           )}
                         </div>
 
@@ -408,16 +544,16 @@ export const OrbitalRing: React.FC<OrbitalRingProps> = ({
                       </div>
 
                       <div className="projects-orbital__panel-content-bottom">
-                        {/* Compact Tech Stack Pills (Up to 3 visible) */}
+                        {/* Compact Tech Stack Pills */}
                         <div className="projects-orbital__tech-row">
-                          {project.tech.slice(0, 3).map((tech) => (
+                          {project.tech.slice(0, 2).map((tech) => (
                             <span key={tech} className="projects-orbital__tech-badge">
                               {tech}
                             </span>
                           ))}
-                          {project.tech.length > 3 && (
+                          {project.tech.length > 2 && (
                             <span className="projects-orbital__tech-more">
-                              +{project.tech.length - 3}
+                              +{project.tech.length - 2}
                             </span>
                           )}
                         </div>
@@ -469,7 +605,7 @@ export const OrbitalRing: React.FC<OrbitalRingProps> = ({
                       <div className="projects-orbital__back-num">{formattedNum}</div>
                       <div className="projects-orbital__back-title">{project.title}</div>
                       <div className="projects-orbital__back-cue">
-                        <span>CLICK TO FOCUS</span>
+                        <span>FOCUS</span>
                       </div>
                     </div>
                   </div>
@@ -477,11 +613,104 @@ export const OrbitalRing: React.FC<OrbitalRingProps> = ({
               })}
             </div>
           </div>
+
+          {/* Focused Responsive Card Presentation Mode */}
+          {viewMode === "card" && (
+            <div className="projects-orbital__deck-container">
+              {projects.map((project, i) => {
+                if (i !== activeIndex) return null;
+                const formattedNum = String(i + 1).padStart(2, "0");
+
+                return (
+                  <div
+                    key={`card-deck-${project.title}-${i}`}
+                    className="projects-orbital__deck-card"
+                    style={
+                      {
+                        "--card-w": `${Math.min(panelSize.w + 30, 340)}px`,
+                        "--card-h": `${Math.min(panelSize.h + 50, 390)}px`,
+                      } as React.CSSProperties
+                    }
+                  >
+                    <div className="projects-orbital__deck-card-inner">
+                      <div className="projects-orbital__panel-content-top">
+                        <div className="projects-orbital__panel-top">
+                          <span className="projects-orbital__pnum">{formattedNum} / {String(count).padStart(2, "0")}</span>
+                          <span className="projects-orbital__year-badge">{project.year}</span>
+                          {project.highlight && (
+                            <span className="highlight-badge">⭐ Featured</span>
+                          )}
+                        </div>
+
+                        <h3 className="projects-orbital__deck-title">{project.title}</h3>
+
+                        <p className="projects-orbital__deck-desc">{project.description}</p>
+                      </div>
+
+                      <div className="projects-orbital__panel-content-bottom">
+                        <div className="projects-orbital__tech-row">
+                          {project.tech.map((tech) => (
+                            <span key={tech} className="projects-orbital__tech-badge">
+                              {tech}
+                            </span>
+                          ))}
+                        </div>
+
+                        {project.note && (
+                          <div className="projects-orbital__deck-note">
+                            ⚠️ <strong>Note:</strong> {project.note}
+                          </div>
+                        )}
+
+                        <div className="projects-orbital__panel-actions">
+                          {project.github && (
+                            <a
+                              href={project.github}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="projects-orbital__btn-link projects-orbital__btn-code"
+                            >
+                              <FiGithub size={13} />
+                              <span>Source Code</span>
+                            </a>
+                          )}
+                          {project.demo && project.demo !== "#" && (
+                            <a
+                              href={project.demo}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="projects-orbital__btn-link projects-orbital__btn-live"
+                            >
+                              <FiExternalLink size={13} />
+                              <span>Live Demo</span>
+                            </a>
+                          )}
+                          <button
+                            type="button"
+                            className="projects-orbital__btn-details"
+                            onClick={() => onSelectProject(project, i)}
+                            title="Inspect Details"
+                            aria-label={`Inspect ${project.title}`}
+                          >
+                            <FiInfo size={14} />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Vertical Project-Number Selector on the Right Side */}
-      <nav className="projects-orbital__vertical-nav" role="tablist" aria-label="Project Navigation">
+      {/* Desktop Vertical Project-Number Selector on the Right Side */}
+      <nav
+        className="projects-orbital__vertical-nav"
+        role="tablist"
+        aria-label="Project Navigation"
+      >
         <div className="projects-orbital__vertical-line" />
         {projects.map((p, idx) => {
           const isActive = activeIndex === idx;
@@ -504,60 +733,108 @@ export const OrbitalRing: React.FC<OrbitalRingProps> = ({
         })}
       </nav>
 
-      {/* Minimal Lower-Left Controls Cluster */}
+      {/* Lower Unified Controls Cluster */}
       <div className="projects-orbital__controls-bottom-left">
-        {/* Step Arrows + Active Counter */}
-        <div className="projects-orbital__mini-group">
-          <button
-            type="button"
-            className="projects-orbital__step-btn"
-            onClick={handlePrev}
-            aria-label="Previous Project"
-            title="Rotate to previous project"
-          >
-            <FiChevronLeft size={16} />
-          </button>
-          <button
-            type="button"
-            className="projects-orbital__step-btn"
-            onClick={handleNext}
-            aria-label="Next Project"
-            title="Rotate to next project"
-          >
-            <FiChevronRight size={16} />
-          </button>
-          <span className="projects-orbital__mono-counter">
-            {String(activeIndex + 1).padStart(2, "0")} / {String(count).padStart(2, "0")}
-          </span>
+        {/* Mobile Horizontal Navigation Indicators */}
+        <div className="projects-orbital__mobile-nav" role="tablist" aria-label="Mobile Project Navigation">
+          {projects.map((p, idx) => {
+            const isActive = activeIndex === idx;
+            const formattedNum = String(idx + 1).padStart(2, "0");
+            return (
+              <button
+                key={`mob-nav-${p.title}-${idx}`}
+                type="button"
+                role="tab"
+                aria-selected={isActive}
+                className={`projects-orbital__mob-dot ${isActive ? "is-active" : ""}`}
+                onClick={() => rotateToProject(idx)}
+                aria-label={`Jump to Project ${formattedNum}`}
+              >
+                <span className="projects-orbital__mob-dot-fill" />
+              </button>
+            );
+          })}
         </div>
 
-        {/* Spacing Controls (T, D, W) */}
-        <div className="projects-orbital__mini-spacing" role="group" aria-label="Ring spacing">
-          {["T", "D", "W"].map((label, idx) => (
+        {/* Buttons Row */}
+        <div className="projects-orbital__controls-row">
+          {/* Step Arrows + Active Counter */}
+          <div className="projects-orbital__mini-group">
             <button
-              key={label}
               type="button"
-              className={`projects-orbital__spacing-btn ${spacingIdx === idx ? "is-active" : ""}`}
-              onClick={() => setSpacingIdx(idx)}
-              title={`${label === "T" ? "Tight" : label === "D" ? "Default" : "Wide"} Spacing`}
-              aria-label={`Spacing option ${label}`}
+              className="projects-orbital__step-btn"
+              onClick={handlePrev}
+              aria-label="Previous Project"
+              title="Rotate to previous project"
             >
-              {label}
+              <FiChevronLeft size={16} />
             </button>
-          ))}
-        </div>
+            <button
+              type="button"
+              className="projects-orbital__step-btn"
+              onClick={handleNext}
+              aria-label="Next Project"
+              title="Rotate to next project"
+            >
+              <FiChevronRight size={16} />
+            </button>
+            <span className="projects-orbital__mono-counter">
+              {String(activeIndex + 1).padStart(2, "0")} / {String(count).padStart(2, "0")}
+            </span>
+          </div>
 
-        {/* Auto-Orbit Pause/Play */}
-        <button
-          type="button"
-          className={`projects-orbital__switch ${autoOrbit ? "is-active" : ""}`}
-          onClick={() => setAutoOrbit(!autoOrbit)}
-          aria-pressed={autoOrbit}
-          title={autoOrbit ? "Pause Auto-Orbit" : "Resume Auto-Orbit"}
-        >
-          {autoOrbit ? <FiPause size={11} /> : <FiPlay size={11} />}
-          <span>{autoOrbit ? "ORBIT" : "PAUSED"}</span>
-        </button>
+          {/* Spacing Controls (T, D, W) */}
+          {viewMode === "orbit" && (
+            <div
+              className="projects-orbital__mini-spacing"
+              role="group"
+              aria-label="Ring spacing"
+            >
+              {["T", "D", "W"].map((label, idx) => (
+                <button
+                  key={label}
+                  type="button"
+                  className={`projects-orbital__spacing-btn ${
+                    spacingIdx === idx ? "is-active" : ""
+                  }`}
+                  onClick={() => setSpacingIdx(idx)}
+                  title={`${
+                    label === "T" ? "Tight" : label === "D" ? "Default" : "Wide"
+                  } Spacing`}
+                  aria-label={`Spacing option ${label}`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* View Toggle (3D Orbit vs Focused Card) */}
+          <button
+            type="button"
+            className="projects-orbital__view-toggle"
+            onClick={() => setViewMode(viewMode === "orbit" ? "card" : "orbit")}
+            title={`Switch to ${viewMode === "orbit" ? "Card Deck" : "3D Orbit"} View`}
+            aria-label={`Switch view, current mode is ${viewMode}`}
+          >
+            {viewMode === "orbit" ? <FiLayers size={12} /> : <FiBox size={12} />}
+            <span>{viewMode === "orbit" ? "CARD" : "3D"}</span>
+          </button>
+
+          {/* Auto-Orbit Pause/Play Switch */}
+          {viewMode === "orbit" && (
+            <button
+              type="button"
+              className={`projects-orbital__switch ${autoOrbit ? "is-active" : ""}`}
+              onClick={() => setAutoOrbit(!autoOrbit)}
+              aria-pressed={autoOrbit}
+              title={autoOrbit ? "Pause Auto-Orbit" : "Resume Auto-Orbit"}
+            >
+              {autoOrbit ? <FiPause size={11} /> : <FiPlay size={11} />}
+              <span>{autoOrbit ? "ORBIT" : "PAUSED"}</span>
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -118,7 +118,7 @@ const Contact = () => {
             Location
           </p>
           <p style={{ color: "var(--cyan)", fontSize: "0.9rem" }}>
-            Gandhinagar, India
+            Bhavnagar, India
           </p>
         </div>
       </motion.div>

@@ -60,7 +60,7 @@ export const experience = [
     linkedin: "https://www.linkedin.com/company/14657063/",
     logo: "https://media.licdn.com/dms/image/v2/D4D0BAQGx0blL4jLjBg/company-logo_100_100/company-logo_100_100/0/1694598995610/magnusmind_logo?e=1794441600&v=beta&t=e80Jpn1u8EdvCZ0eOKAMhXY6jCV70IWwyOQUwKxgbUE",
     points: [
-      "Full-time Software Engineer Intern working on-site in Ahmedabad, contributing to core application development and modern engineering solutions.",
+      "Contributing to application development by debugging complex issues, solving technical challenges, and developing innovative features. Exploring and integrating AI-powered solutions, researching emerging technologies, and optimizing application functionality to deliver reliable, efficient, and user-focused experiences.",
     ],
   },
   {
