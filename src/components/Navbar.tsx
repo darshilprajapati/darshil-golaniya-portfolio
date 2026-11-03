@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const navLinks = [
@@ -10,7 +10,11 @@ const navLinks = [
   { label: "Contact", href: "#contact" },
 ];
 
-const Navbar = () => {
+interface NavbarProps {
+  isLogoHidden?: boolean;
+}
+
+const Navbar: React.FC<NavbarProps> = ({ isLogoHidden = false }) => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("");
@@ -42,9 +46,9 @@ const Navbar = () => {
   return (
     <>
       <motion.nav
-        initial={{ y: -80, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.6, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
         style={{
           position: "fixed",
           top: 0,
@@ -67,6 +71,7 @@ const Navbar = () => {
         {/* Logo */}
         <a href="#hero" style={{ textDecoration: "none" }}>
           <motion.div
+            id="navbar-logo"
             whileHover={{ scale: 1.05 }}
             style={{
               fontFamily: "'Plus Jakarta Sans', 'DM Sans', sans-serif",
@@ -76,6 +81,8 @@ const Navbar = () => {
               textShadow: "0 0 16px rgba(0, 212, 255, 0.4)",
               letterSpacing: "0.04em",
               cursor: "pointer",
+              opacity: isLogoHidden ? 0 : 1,
+              transition: "opacity 0.2s ease",
             }}
           >
             DG

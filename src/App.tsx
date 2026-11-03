@@ -1,5 +1,5 @@
 import { useState } from "react";
-import SplashScreen from "./components/SplashScreen";
+import SplashScreen, { type SplashState } from "./components/SplashScreen";
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
 import About from "./components/About";
@@ -12,26 +12,38 @@ import Contact from "./components/Contact";
 import Footer from "./components/Footer";
 
 function App() {
-  const [loadingDone, setLoadingDone] = useState(false);
+  const [splashState, setSplashState] = useState<SplashState>("loading");
 
   return (
     <>
-      {!loadingDone && <SplashScreen onComplete={() => setLoadingDone(true)} />}
-
-      {loadingDone && (
-        <>
-          <Navbar />
-          <Hero />
-          <About />
-          <Skills />
-          <Experience />
-          <Projects />
-          <Education />
-          <Certifications />
-          <Contact />
-          <Footer />
-        </>
+      {splashState !== "complete" && (
+        <SplashScreen
+          splashState={splashState}
+          onStartTransition={() => setSplashState("transitioning")}
+          onComplete={() => setSplashState("complete")}
+        />
       )}
+
+      {/* Main Portfolio */}
+      <div
+        className="main-portfolio-root"
+        style={{
+          opacity: splashState === "loading" ? 0 : 1,
+          transition: splashState === "transitioning" ? "opacity 0.75s ease-out" : "none",
+          pointerEvents: splashState === "complete" ? "auto" : "none",
+        }}
+      >
+        <Navbar isLogoHidden={splashState !== "complete"} />
+        <Hero />
+        <About />
+        <Skills />
+        <Experience />
+        <Projects />
+        <Education />
+        <Certifications />
+        <Contact />
+        <Footer />
+      </div>
     </>
   );
 }
