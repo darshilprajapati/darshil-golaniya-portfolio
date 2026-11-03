@@ -1,0 +1,305 @@
+/* ============================================================
+   ABOUT SECTION & DIAGONAL SPLIT VIDEO DESIGN
+   ============================================================ */
+
+.about-section {
+  padding: 100px 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  position: relative;
+  box-sizing: border-box;
+}
+
+/* Two-column layout container for Desktop */
+.about-split-container {
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: 56px;
+  align-items: center;
+  position: relative;
+}
+
+/* Left Content Column */
+.about-left-content {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  z-index: 2;
+}
+
+.about-header {
+  margin-bottom: 28px;
+}
+
+.about-paragraph {
+  font-size: 1rem;
+  color: var(--text-muted);
+  line-height: 1.8;
+  margin-bottom: 20px;
+}
+
+.about-paragraph:last-of-type {
+  margin-bottom: 28px;
+}
+
+/* Skill Tags Row */
+.about-tags-wrapper {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.about-tag-card {
+  padding: 12px 22px;
+  border-radius: 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+  cursor: default;
+}
+
+.about-tag-card:hover {
+  border-color: rgba(0, 212, 255, 0.4);
+  box-shadow: var(--glow-cyan), inset 0 0 30px rgba(0, 212, 255, 0.05);
+  transform: translateY(-3px);
+}
+
+.about-tag-text {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+
+/* ============================================================
+   RIGHT COLUMN: DIAGONAL SPLIT / CLIP VIDEO STYLES
+   ============================================================ */
+
+.about-right-visual {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Outer frame with smooth cyan/purple drop-shadow glow */
+.diagonal-video-frame {
+  position: relative;
+  width: 100%;
+  filter: drop-shadow(0 0 20px rgba(0, 212, 255, 0.3)) drop-shadow(0 0 45px rgba(121, 40, 202, 0.18));
+  transition: filter 0.4s ease, transform 0.4s ease;
+  will-change: filter, transform;
+}
+
+.diagonal-video-frame:hover {
+  filter: drop-shadow(0 0 28px rgba(0, 212, 255, 0.45)) drop-shadow(0 0 60px rgba(121, 40, 202, 0.28));
+  transform: translateY(-2px);
+}
+
+/* Clipped border layer creating the crisp 1.5px glowing border */
+.diagonal-video-border {
+  position: relative;
+  width: 100%;
+  height: 400px;
+  background: linear-gradient(
+    135deg,
+    rgba(0, 212, 255, 0.85) 0%,
+    rgba(0, 212, 255, 0.3) 30%,
+    rgba(121, 40, 202, 0.4) 65%,
+    rgba(0, 212, 255, 0.75) 100%
+  );
+  clip-path: polygon(52px 0%, 100% 0%, 100% calc(100% - 16px), calc(100% - 16px) 100%, 0% 100%);
+  padding: 1.5px;
+  box-sizing: border-box;
+}
+
+/* Inner clipped video wrapper */
+.diagonal-video-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  clip-path: polygon(51px 0%, 100% 0%, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0% 100%);
+  background: var(--bg-2);
+  overflow: hidden;
+  border-radius: 0;
+}
+
+/* The video element itself */
+.diagonal-video-element {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  pointer-events: none; /* Disables interaction to behave strictly as visual art */
+  user-select: none;
+  background: #000;
+}
+
+/* Hide all native media controls across browsers */
+.diagonal-video-element::-webkit-media-controls {
+  display: none !important;
+}
+.diagonal-video-element::-webkit-media-controls-start-playback-button {
+  display: none !important;
+}
+.diagonal-video-element::-webkit-media-controls-play-button {
+  display: none !important;
+}
+.diagonal-video-element::-webkit-media-controls-enclosure {
+  display: none !important;
+}
+
+/* Atmospheric gradient overlay (subtle cyber vignette) */
+.diagonal-video-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(5, 5, 8, 0.25) 0%,
+      transparent 25%,
+      transparent 75%,
+      rgba(5, 5, 8, 0.5) 100%
+    ),
+    linear-gradient(
+      90deg,
+      rgba(0, 212, 255, 0.08) 0%,
+      transparent 20%
+    );
+  z-index: 2;
+}
+
+/* ============================================================
+   RESPONSIVE DESIGN BREAKPOINTS
+   ============================================================ */
+
+/* Large Tablets & Small Laptops (1024px) */
+@media (max-width: 1024px) and (min-width: 769px) {
+  .about-section {
+    padding: 80px 2rem;
+  }
+
+  .about-split-container {
+    gap: 40px;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .diagonal-video-border {
+    height: 360px;
+    clip-path: polygon(40px 0%, 100% 0%, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0% 100%);
+  }
+
+  .diagonal-video-inner {
+    height: 100%;
+    clip-path: polygon(39px 0%, 100% 0%, 100% calc(100% - 13px), calc(100% - 13px) 100%, 0% 100%);
+  }
+}
+
+/* Medium Tablets & Mobile Stack Layout (<= 768px) */
+@media (max-width: 768px) {
+  .about-section {
+    padding: 70px 1.5rem;
+  }
+
+  .about-split-container {
+    grid-template-columns: 1fr;
+    gap: 36px;
+  }
+
+  .about-left-content {
+    order: 1;
+  }
+
+  .about-right-visual {
+    order: 2;
+    width: 100%;
+  }
+
+  .diagonal-video-frame {
+    max-width: 100%;
+    margin: 0 auto;
+  }
+
+  .diagonal-video-border {
+    height: 280px;
+    clip-path: polygon(28px 0%, 100% 0%, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0% 100%);
+  }
+
+  .diagonal-video-inner {
+    height: 100%;
+    clip-path: polygon(27px 0%, 100% 0%, 100% calc(100% - 11px), calc(100% - 11px) 100%, 0% 100%);
+  }
+}
+
+/* Small to Standard Mobile Screens (320px - 480px) */
+@media (max-width: 480px) {
+  .about-section {
+    padding: 60px 1rem;
+  }
+
+  .about-split-container {
+    gap: 28px;
+  }
+
+  .about-header {
+    margin-bottom: 20px;
+  }
+
+  .about-paragraph {
+    font-size: 0.95rem;
+    line-height: 1.7;
+    margin-bottom: 16px;
+  }
+
+  .about-tags-wrapper {
+    gap: 10px;
+  }
+
+  .about-tag-card {
+    padding: 10px 16px;
+  }
+
+  .about-tag-text {
+    font-size: 0.8rem;
+  }
+
+  /* Compact diagonal angle for mobile */
+  .diagonal-video-border {
+    height: 220px;
+    clip-path: polygon(20px 0%, 100% 0%, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0% 100%);
+  }
+
+  .diagonal-video-inner {
+    height: 100%;
+    clip-path: polygon(19px 0%, 100% 0%, 100% calc(100% - 9px), calc(100% - 9px) 100%, 0% 100%);
+  }
+}
+
+/* Extra Small Mobile (<= 360px) */
+@media (max-width: 360px) {
+  .diagonal-video-border {
+    height: 195px;
+    clip-path: polygon(16px 0%, 100% 0%, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0% 100%);
+  }
+
+  .diagonal-video-inner {
+    height: 100%;
+    clip-path: polygon(15px 0%, 100% 0%, 100% calc(100% - 7px), calc(100% - 7px) 100%, 0% 100%);
+  }
+}
+
+/* Accessibility: Respect Reduced Motion Preferences */
+@media (prefers-reduced-motion: reduce) {
+  .diagonal-video-frame,
+  .diagonal-video-frame:hover,
+  .about-tag-card:hover {
+    transition: none;
+    transform: none;
+    filter: none;
+  }
+}

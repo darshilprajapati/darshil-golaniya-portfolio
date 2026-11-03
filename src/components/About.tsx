@@ -1,130 +1,147 @@
+import React, { useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import { personalInfo } from "../data/portfolioData";
+import aboutVideo from "../assets/about_video_no_gemini_logo.mp4";
+import "./About.css";
 
-const About = () => {
+// Track playback-once per page visit across potential re-renders or tab switches
+let hasPlayedVideoInSession = false;
+
+const About: React.FC = () => {
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    // Strict autoplay policy compliance: muted and playsinline
+    video.muted = true;
+    video.defaultMuted = true;
+    video.playsInline = true;
+
+    // If already played during this page visit, do not trigger again
+    if (hasPlayedVideoInSession) {
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && !hasPlayedVideoInSession) {
+            hasPlayedVideoInSession = true;
+
+            // Respect prefers-reduced-motion
+            if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+              observer.disconnect();
+              return;
+            }
+
+            const playPromise = video.play();
+            if (playPromise !== undefined) {
+              playPromise.catch((err) => {
+                // Gracefully handle browser autoplay blocks without showing controls
+                console.warn("Autoplay deferred or blocked by browser:", err);
+              });
+            }
+
+            // Immediately disconnect observer so scrolling away/returning does not replay
+            observer.disconnect();
+          }
+        });
+      },
+      {
+        threshold: 0.15,
+        rootMargin: "0px",
+      }
+    );
+
+    observer.observe(video);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
+
+  const handleVideoEnded = () => {
+    // When playback reaches the end, naturally retain the final frame as a still image
+    if (videoRef.current) {
+      videoRef.current.pause();
+    }
+  };
+
   return (
-    <section
-      id="about"
-      style={{
-        padding: "100px 2rem",
-        maxWidth: "1200px",
-        margin: "0 auto",
-      }}
-    >
-      {/* Section Header */}
-      <div style={{ marginBottom: "60px" }}>
-        <span className="section-label">About Me</span>
-        <h2 className="section-title gradient-text">
-          Who I Am
-        </h2>
-        <div className="section-divider" />
-      </div>
+    <section id="about" className="about-section">
+      <div className="about-split-container">
+        {/* Left Side: Heading, Description, and Existing Skill Tags */}
+        <motion.div
+          className="about-left-content"
+          initial={{ opacity: 0, y: 35 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7 }}
+          viewport={{ once: true }}
+        >
+          {/* Section Header */}
+          <div className="about-header">
+            <span className="section-label">About Me</span>
+            <h2 className="section-title gradient-text">
+              Who I Am
+            </h2>
+            <div className="section-divider" />
+          </div>
 
-      <motion.div
-        initial={{ opacity: 0, y: 40 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.7 }}
-        viewport={{ once: true }}
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gap: "60px",
-          alignItems: "center",
-        }}
-      >
-        {/* Left Content */}
-        <div>
-          <p
-            style={{
-              fontSize: "1rem",
-              color: "var(--text-muted)",
-              lineHeight: 1.8,
-              marginBottom: "24px",
-            }}
-          >
+          <p className="about-paragraph">
             {personalInfo.summary}
           </p>
 
-          <p
-            style={{
-              fontSize: "0.95rem",
-              color: "var(--text-muted)",
-              lineHeight: 1.8,
-            }}
-          >
+          <p className="about-paragraph">
             I specialize in building intelligent applications using AI/ML,
             along with modern full-stack technologies like React and .NET.
             My focus is on creating scalable, real-world solutions with clean
             architecture and impactful user experience.
           </p>
 
-          {/* Info Cards */}
-          <div
-            style={{
-              display: "flex",
-              gap: "20px",
-              marginTop: "32px",
-              flexWrap: "wrap",
-            }}
-          >
-            <div className="glass-card" style={{ padding: "16px 20px" }}>
-              <span className="gradient-text">AI / ML</span>
+          {/* Skill Tags */}
+          <div className="about-tags-wrapper">
+            <div className="glass-card about-tag-card">
+              <span className="gradient-text about-tag-text">AI / ML</span>
             </div>
-            <div className="glass-card" style={{ padding: "16px 20px" }}>
-              <span className="gradient-text">Full Stack</span>
+            <div className="glass-card about-tag-card">
+              <span className="gradient-text about-tag-text">Full Stack</span>
             </div>
-            <div className="glass-card" style={{ padding: "16px 20px" }}>
-              <span className="gradient-text">.NET + React</span>
+            <div className="glass-card about-tag-card">
+              <span className="gradient-text about-tag-text">.NET + React</span>
             </div>
           </div>
-        </div>
-
-        {/* Right Visual Card */}
-        <motion.div
-          whileHover={{ scale: 1.03 }}
-          style={{
-            padding: "40px",
-            borderRadius: "16px",
-            background: "var(--bg-card)",
-            border: "1px solid var(--border)",
-            backdropFilter: "blur(12px)",
-          }}
-        >
-          <h3
-            style={{
-              fontFamily: "var(--font-display)",
-              fontSize: "1.4rem",
-              marginBottom: "20px",
-            }}
-          >
-            Quick Info
-          </h3>
-
-          <ul
-            style={{
-              listStyle: "none",
-              display: "flex",
-              flexDirection: "column",
-              gap: "12px",
-              color: "var(--text-muted)",
-              fontSize: "0.9rem",
-            }}
-          >
-            <li>📍 Bhavnagar, India</li>
-            <li>🎓 B.E. Computer Engineering</li>
-            <li>💼 Open to Full-Time Opportunities</li>
-            <li>⚡AI & full-stack (.NET, React) growth.</li>
-          </ul>
         </motion.div>
-      </motion.div>
 
-      <style>{`
-        @media (max-width: 768px) {
-          section#about div[style*="grid-template-columns"] {
-            grid-template-columns: 1fr !important;
-          }
-        }
-      `}</style>
+        {/* Right Side: Prominent Diagonal Clipped Video Container */}
+        <motion.div
+          className="about-right-visual"
+          initial={{ opacity: 0, x: 30 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.7, delay: 0.15 }}
+          viewport={{ once: true }}
+        >
+          <div className="diagonal-video-frame">
+            <div className="diagonal-video-border">
+              <div className="diagonal-video-inner">
+                <video
+                  ref={videoRef}
+                  src={aboutVideo}
+                  muted
+                  playsInline
+                  preload="metadata"
+                  className="diagonal-video-element"
+                  onEnded={handleVideoEnded}
+                  aria-label="Darshil visual showcase"
+                />
+                {/* Subtle dark gradient cyber overlay */}
+                <div className="diagonal-video-overlay" />
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      </div>
     </section>
   );
 };
